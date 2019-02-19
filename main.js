@@ -42,6 +42,8 @@ Circle.prototype.collide = function (other) {
     return distance(this, other) < this.radius + other.radius;
 };
 
+let count = 2;
+
 Circle.prototype.update = function () {
     Entity.prototype.update.call(this);
 
@@ -57,10 +59,12 @@ Circle.prototype.update = function () {
 
     for (var i = 0; i < this.game.entities.length; i++) {
         var ent = this.game.entities[i];
-        if (this != ent && this.collide(ent)) {
+        if (this != ent && this.collide(ent) && count < 20) {
             var temp = this.velocity;
             this.velocity = ent.velocity;
             ent.velocity = temp;
+            this.game.addEntity(new Circle(this.game));
+            count++;
         };
     };
 
@@ -106,7 +110,6 @@ var ASSET_MANAGER = new AssetManager();
 ASSET_MANAGER.queueDownload("./img/white.png");
 
 ASSET_MANAGER.downloadAll(function () {
-    console.log("starting up da sheild");
     var canvas = document.getElementById('gameWorld');
     var ctx = canvas.getContext('2d');
 
