@@ -103,8 +103,6 @@ var maxSpeed = 2000;
 
 var ASSET_MANAGER = new AssetManager();
 
-ASSET_MANAGER.queueDownload("./img/960px-Blank_Go_board.png");
-ASSET_MANAGER.queueDownload("./img/black.png");
 ASSET_MANAGER.queueDownload("./img/white.png");
 
 ASSET_MANAGER.downloadAll(function () {
@@ -113,11 +111,8 @@ ASSET_MANAGER.downloadAll(function () {
     var ctx = canvas.getContext('2d');
 
     var gameEngine = new GameEngine();
-    var circle = new Circle(gameEngine);
-    circle.color = 0;
-    gameEngine.addEntity(circle);
 
-    for (var i = 0; i < 30; i++) {
+    for (var i = 0; i < 2; i++) {
         circle = new Circle(gameEngine);
         gameEngine.addEntity(circle);
     };
