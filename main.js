@@ -25,7 +25,7 @@ Animation.prototype.drawFrame = function (tick, ctx, x, y) {
     yindex = Math.floor(frame / this.sheetWidth);
 
     ctx.drawImage(this.spriteSheet,
-        xindex * this.frameWidth, yindex * this.frameHeight,  // source from sheet
+        xindex * this.frameWidth, yindex * this.frameHeight,
         this.frameWidth, this.frameHeight,
         x, y,
         this.frameWidth * this.scale,
@@ -64,14 +64,14 @@ function distance(a, b) {
 
 var game;
 
-function Naruto(game) {
+function Naruto(game, x, y) {
     this.game = game;
     this.ctx = game.ctx;
     this.spriteSheet = ASSET_MANAGER.getAsset("./img/naruto.png");
     this.animation = new Animation(this.spriteSheet, 159, 192, 1, 1, 1, true, .5)
     this.player = 1;
     this.radius = 20;
-    Entity.call(this, game, this.radius + Math.random() * (800 - this.radius * 2), this.radius + Math.random() * (800 - this.radius * 2));
+    Entity.call(this, game, this.radius + x, this.radius + y);
     this.velocity = { x: Math.random() * 100, y: Math.random() * 100 };
     var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
     if (speed > maxSpeed) {
@@ -125,7 +125,7 @@ Naruto.prototype.update = function () {
             var temp = this.velocity;
             this.velocity = ent.velocity;
             ent.velocity = temp;
-            this.game.addEntity(new Naruto(this.game));
+            this.game.addEntity(new Naruto(this.game, Math.random() * (800 - this.radius * 2), Math.random() * (800 - this.radius * 2)));
             count++;
         };
     };
@@ -153,106 +153,15 @@ Naruto.prototype.update = function () {
 
 }
 
-// function Circle(game) {
-//     this.player = 1;
-//     this.radius = 20;
-//     this.colors = ["Red", "Green", "Blue", "White"];
-//     this.color = 3;
-//     Entity.call(this, game, this.radius + Math.random() * (800 - this.radius * 2), this.radius + Math.random() * (800 - this.radius * 2));
-//     this.velocity = { x: Math.random() * 100, y: Math.random() * 100 };
-//     var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
-//     if (speed > maxSpeed) {
-//         var ratio = maxSpeed / speed;
-//         this.velocity.x *= ratio;
-//         this.velocity.y *= ratio;
-//     };
-// }
-
-// Circle.prototype = new Entity();
-// Circle.prototype.constructor = Circle;
-
-// Circle.prototype.collideRight = function () {
-//     return this.x + this.radius > 800;
-// };
-// Circle.prototype.collideLeft = function () {
-//     return this.x - this.radius < 0;
-// };
-// Circle.prototype.collideBottom = function () {
-//     return this.y + this.radius > 800;
-// };
-// Circle.prototype.collideTop = function () {
-//     return this.y - this.radius < 0;
-// };
-
-// Circle.prototype.collide = function (other) {
-//     return distance(this, other) < this.radius + other.radius;
-// };
-
-// Circle.prototype.update = function () {
-//     Entity.prototype.update.call(this);
-
-//     this.x += this.velocity.x * this.game.clockTick;
-//     this.y += this.velocity.y * this.game.clockTick;
-
-//     if (this.collideLeft() || this.collideRight()) {
-//         this.velocity.x = -this.velocity.x;
-//     }
-//     if (this.collideTop() || this.collideBottom()) {
-//         this.velocity.y = -this.velocity.y;
-//     }
-
-//     for (var i = 0; i < this.game.entities.length; i++) {
-//         var ent = this.game.entities[i];
-//         if (this != ent && this.collide(ent) && count < 20) {
-//             var temp = this.velocity;
-//             this.velocity = ent.velocity;
-//             ent.velocity = temp;
-//             this.game.addEntity(new Circle(this.game));
-//             count++;
-//         };
-//     };
-
-//     for (var i = 0; i < this.game.entities.length; i++) {
-//         var ent = this.game.entities[i];
-//         if (this != ent) {
-//             var dist = distance(this, ent);
-//             var difX = (ent.x - this.x) / dist;
-//             var difY = (ent.y - this.y) / dist;
-//             this.velocity.x += difX / (dist * dist) * acceleration;
-//             this.velocity.y += difY / (dist * dist) * acceleration;
-
-//             var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
-//             if (speed > maxSpeed) {
-//                 var ratio = maxSpeed / speed;
-//                 this.velocity.x *= ratio;
-//                 this.velocity.y *= ratio;
-//             };
-//         };
-//     }
-
-//     this.velocity.x -= (1 - friction) * this.game.clockTick * this.velocity.x;
-//     this.velocity.y -= (1 - friction) * this.game.clockTick * this.velocity.y;
-
-// }
-
-// Circle.prototype.draw = function (ctx) {
-//     ctx.beginPath();
-//     ctx.fillStyle = this.colors[this.color];
-//     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-//     ctx.fill();
-//     ctx.closePath();
-// }
-
 var friction = 1;
 var acceleration = 10000;
 var maxSpeed = 2000;
 let count = 2;
 
-// the "main" code begins here
+
 
 var ASSET_MANAGER = new AssetManager();
 
-//ASSET_MANAGER.queueDownload("./img/white.png");
 ASSET_MANAGER.queueDownload("./img/naruto.png");
 ASSET_MANAGER.queueDownload("./img/leafvil.jpg");
 
@@ -263,16 +172,16 @@ ASSET_MANAGER.downloadAll(function () {
     var gameEngine = new GameEngine();
     game = gameEngine;
 
-    gameEngine.init(ctx);
-    gameEngine.start();
+    game.init(ctx);
+    game.start();
 
-    var village = new Background(gameEngine, ASSET_MANAGER.getAsset("./img/leafvil.jpg"))
-    var naruto = new Naruto(gameEngine);
-    var narutoClone = new Naruto(gameEngine)
+    var village = new Background(game, ASSET_MANAGER.getAsset("./img/leafvil.jpg"))
+    var naruto = new Naruto(game, 300, 300);
+    var narutoClone = new Naruto(game, 500, 500)
 
-    gameEngine.addEntity(village);
-    gameEngine.addEntity(naruto);
-    gameEngine.addEntity(narutoClone);
+    game.addEntity(village);
+    game.addEntity(naruto);
+    game.addEntity(narutoClone);
 
     // Assignment 3
 
@@ -285,10 +194,9 @@ ASSET_MANAGER.downloadAll(function () {
         var dataInfo = data.data.stuff;
         for (var i = 0; i < dataInfo.length; i++) {
             var info = dataInfo[i];
-            var clone = new Naruto(game);
-            clone.x = info.x;
-            clone.y = info.y;
+            var clone = new Naruto(game, info.x, info.y);
             clone.velocity = info.velocity;
+            console.log(info.velocity);
             game.addEntity(clone);
         }
     });
@@ -301,7 +209,7 @@ ASSET_MANAGER.downloadAll(function () {
         console.log("save");
         text.innerHTML = "Saved."
 
-        state = {
+        var state = {
             stuff: []
         };
         for (var i = 0; i < game.entities.length; i++) {
@@ -324,8 +232,3 @@ ASSET_MANAGER.downloadAll(function () {
     };
 
 });
-
-// window.onload = function () {
-
-
-// };
