@@ -25,11 +25,11 @@ Animation.prototype.drawFrame = function (tick, ctx, x, y) {
     yindex = Math.floor(frame / this.sheetWidth);
 
     ctx.drawImage(this.spriteSheet,
-                 xindex * this.frameWidth, yindex * this.frameHeight,  // source from sheet
-                 this.frameWidth, this.frameHeight,
-                 x, y,
-                 this.frameWidth * this.scale,
-                 this.frameHeight * this.scale);
+        xindex * this.frameWidth, yindex * this.frameHeight,  // source from sheet
+        this.frameWidth, this.frameHeight,
+        x, y,
+        this.frameWidth * this.scale,
+        this.frameHeight * this.scale);
 }
 
 Animation.prototype.currentFrame = function () {
@@ -50,7 +50,7 @@ function Background(game, spritesheet) {
 
 Background.prototype.draw = function () {
     this.ctx.drawImage(this.spritesheet,
-                   this.x, this.y);
+        this.x, this.y);
 };
 
 Background.prototype.update = function () {
@@ -62,15 +62,16 @@ function distance(a, b) {
     return Math.sqrt(difX * difX + difY * difY);
 };
 
-function Naruto(game, x, y) {
+var game;
+
+function Naruto(game) {
     this.game = game;
     this.ctx = game.ctx;
     this.spriteSheet = ASSET_MANAGER.getAsset("./img/naruto.png");
     this.animation = new Animation(this.spriteSheet, 159, 192, 1, 1, 1, true, .5)
     this.player = 1;
     this.radius = 20;
-    //Entity.call(this, game, this.radius + Math.random() * (800 - this.radius * 2), this.radius + Math.random() * (800 - this.radius * 2));
-    Entity.call(this, game, this.radius + x, this.radius + y);
+    Entity.call(this, game, this.radius + Math.random() * (800 - this.radius * 2), this.radius + Math.random() * (800 - this.radius * 2));
     this.velocity = { x: Math.random() * 100, y: Math.random() * 100 };
     var speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
     if (speed > maxSpeed) {
@@ -124,7 +125,7 @@ Naruto.prototype.update = function () {
             var temp = this.velocity;
             this.velocity = ent.velocity;
             ent.velocity = temp;
-            this.game.addEntity(new Naruto(this.game, Math.random() * (800 - this.radius * 2), Math.random() * (800 - this.radius * 2)));
+            this.game.addEntity(new Naruto(this.game));
             count++;
         };
     };
@@ -250,7 +251,6 @@ let count = 2;
 // the "main" code begins here
 
 var ASSET_MANAGER = new AssetManager();
-var gameEngine2;
 
 //ASSET_MANAGER.queueDownload("./img/white.png");
 ASSET_MANAGER.queueDownload("./img/naruto.png");
@@ -260,66 +260,72 @@ ASSET_MANAGER.downloadAll(function () {
     var canvas = document.getElementById('gameWorld');
     var ctx = canvas.getContext('2d');
 
-    const rando = Math.random() * (800 - this.radius * 2);
     var gameEngine = new GameEngine();
-    gameEngine2 = gameEngine;
+    game = gameEngine;
+
     gameEngine.init(ctx);
     gameEngine.start();
 
-    village = new Background(gameEngine, ASSET_MANAGER.getAsset("./img/leafvil.jpg"))
-    naruto = new Naruto(gameEngine, rando, rando);
-    narutoClone = new Naruto(gameEngine, rando, rando)
+    var village = new Background(gameEngine, ASSET_MANAGER.getAsset("./img/leafvil.jpg"))
+    var naruto = new Naruto(gameEngine);
+    var narutoClone = new Naruto(gameEngine)
 
     gameEngine.addEntity(village);
     gameEngine.addEntity(naruto);
     gameEngine.addEntity(narutoClone);
 
-});
+    // Assignment 3
 
-window.onload = function () {
     var socket = io.connect("http://24.16.255.56:8888");
-  
+
     socket.on("load", function (data) {
         console.log(data);
 
-        gameEngine2.entities = [];
+        game.entities = [];
         var dataInfo = data.data.stuff;
-         for (var i = 0; i < dataInfo.length; i++) {
+        for (var i = 0; i < dataInfo.length; i++) {
             var info = dataInfo[i];
-            var clone = new Naruto(gameEngine2, info.x, info.y);
+            var clone = new Naruto(game);
+            clone.x = info.x;
+            clone.y = info.y;
             clone.velocity = info.velocity;
-            gameEngine2.addEntity(clone);
-      }
+            game.addEntity(clone);
+        }
     });
-  
+
     var text = document.getElementById("text");
     var saveButton = document.getElementById("save");
     var loadButton = document.getElementById("load");
-  
+
     saveButton.onclick = function () {
-      console.log("save");
-      text.innerHTML = "Saved."
+        console.log("save");
+        text.innerHTML = "Saved."
 
-      state = {
-        stuff: []
-      };
-      for (var i = 0; i < gameEngine2.entities.length; i++) {
-        var entiddy = gameEngine2.entities[i];
+        state = {
+            stuff: []
+        };
+        for (var i = 0; i < game.entities.length; i++) {
+            var entiddy = game.entities[i];
 
-        state.stuff.push({
-            "x": entiddy.x,
-            "y": entiddy.y,
-            "velocity": entiddy.velocity
-        });
-      }
-      socket.emit("save", { studentname: "Sam Hipolito", statename: "narutoes", data: state });
+            state.stuff.push({
+                "x": entiddy.x,
+                "y": entiddy.y,
+                "velocity": entiddy.velocity
+            });
+        }
+        console.log(state);
+        socket.emit("save", { studentname: "Sam Hipolito", statename: "narutoes", data: state });
     };
-  
+
     loadButton.onclick = function () {
-      console.log("load");
-      text.innerHTML = "Loaded."
-      socket.emit("load", { studentname: "Sam Hipolito", statename: "narutoes" });
+        console.log("load");
+        text.innerHTML = "Loaded."
+        socket.emit("load", { studentname: "Sam Hipolito", statename: "narutoes" });
     };
-  
-  };
-  
+
+});
+
+// window.onload = function () {
+
+
+// };
